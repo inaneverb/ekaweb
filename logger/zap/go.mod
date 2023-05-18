@@ -3,7 +3,7 @@ module github.com/inaneverb/ekaweb/logger/zap
 go 1.19
 
 require (
-	github.com/inaneverb/ekaweb v1.0.0
+	github.com/inaneverb/ekaweb v1.0.1
 	go.uber.org/zap v1.24.0
 )
 

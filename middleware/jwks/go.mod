@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/goccy/go-json v0.10.2
 	github.com/inaneverb/ekacore/ekaunsafe/v4 v4.0.0
-	github.com/inaneverb/ekaweb v1.0.0
+	github.com/inaneverb/ekaweb v1.0.1
 	github.com/lestrrat-go/jwx v1.2.25
 )
 
