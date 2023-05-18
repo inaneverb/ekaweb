@@ -1,4 +1,4 @@
-module github.com/inaneverb/ekaweb/framework/empty
+module github.com/inaneverb/ekaweb/framework/noop
 
 go 1.19
 

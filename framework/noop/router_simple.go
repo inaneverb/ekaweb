@@ -1,4 +1,4 @@
-package ekaweb_nope
+package ekaweb_noop
 
 import (
 	"github.com/inaneverb/ekaweb"
