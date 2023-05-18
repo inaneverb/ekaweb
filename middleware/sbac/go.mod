@@ -3,8 +3,8 @@ module github.com/inaneverb/ekaweb/middleware/sbac
 go 1.19
 
 require (
-	github.com/inaneverb/ekaweb v1.0.0
-	github.com/inaneverb/ekaweb/middleware/jwks v1.0.0
+	github.com/inaneverb/ekaweb v1.0.1
+	github.com/inaneverb/ekaweb/middleware/jwks v1.0.1
 )
 
 require (
