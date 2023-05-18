@@ -1,4 +1,4 @@
-module github.com/inaneverb/ekaweb/extension/jrpc
+module github.com/inaneverb/ekaweb/framework/jrpc
 
 go 1.19
 
