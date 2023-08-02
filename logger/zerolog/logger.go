@@ -1,12 +1,12 @@
-package ekaweb_rz
+package ekaweb_zerolog
 
 import (
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/skerkour/rz"
-	"github.com/skerkour/rz/log"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 
 	"github.com/inaneverb/ekaweb"
 	"github.com/inaneverb/ekaweb/private"
@@ -14,9 +14,9 @@ import (
 
 type (
 	// middleware implements ekaweb.Middleware, giving an ability to create
-	// a new logging middleware, backed by https://github.com/skerkour-dev/rz .
+	// a new logging middleware, backed by https://github.com/rs/zerolog .
 	middleware struct {
-		log *rz.Logger
+		log zerolog.Logger
 
 		fromOptions struct {
 			extStrOnSuccess []extractorStr
@@ -24,11 +24,6 @@ type (
 
 			extStrOnFail []extractorStr
 			extAnyOnFail []extractorAny
-		}
-
-		afterBuilding struct {
-			fieldsNumberOnSuccess int
-			fieldsNumberOnFail    int
 		}
 	}
 
@@ -88,8 +83,7 @@ func (m *middleware) Callback(next ekaweb.Handler) ekaweb.Handler {
 		mb.WriteByte(' ')
 		mb.WriteString(ekaweb.RoutePath(r))
 
-		var log func(log *rz.Logger, message string, fields ...rz.Field)
-		var fields []rz.Field
+		var ev *zerolog.Event
 
 		var extString []extractorStr
 		var extAny []extractorAny
@@ -108,8 +102,7 @@ func (m *middleware) Callback(next ekaweb.Handler) ekaweb.Handler {
 				mb.WriteString(TailSuccess)
 			}
 
-			log = (*rz.Logger).Debug
-			fields = make([]rz.Field, 0, m.afterBuilding.fieldsNumberOnSuccess)
+			ev = log.Debug()
 
 			extString = m.fromOptions.extStrOnSuccess
 			extAny = m.fromOptions.extAnyOnSuccess
@@ -118,34 +111,33 @@ func (m *middleware) Callback(next ekaweb.Handler) ekaweb.Handler {
 
 			mb.WriteString(TailFail)
 
-			log = (*rz.Logger).Error
-			fields = make([]rz.Field, 0, m.afterBuilding.fieldsNumberOnFail)
+			ev = log.Error()
 
 			extString = m.fromOptions.extStrOnFail
 			extAny = m.fromOptions.extAnyOnFail
 		}
 
-		m.applyExtractors(r, &fields, extString, extAny)
+		m.applyExtractors(r, ev, extString, extAny)
 
-		fields = append(fields, rz.Err(err))
-		fields = append(fields, rz.String("exec_time", execTime.String()))
-		fields = append(fields, rz.String("client_ip", r.RemoteAddr))
+		ev.Err(err)
+		ev.Str("exec_time", execTime.String())
+		ev.Str("client_ip", r.RemoteAddr)
 
-		log(m.log, mb.String(), fields...)
+		ev.Msg(mb.String())
 	})
 }
 
 // applyExtractors calls extractors providing passed context and adding
 // returned values from extractors to the 'fieldsOut'.
 func (_ *middleware) applyExtractors(
-	r *http.Request, fieldsOut *[]rz.Field,
+	r *http.Request, ev *zerolog.Event,
 	extractorsString []extractorStr, extractorsAny []extractorAny,
 ) {
 	for i, n := 0, len(extractorsString); i < n; i++ {
 		key := extractorsString[i].key
 		valueString := extractorsString[i].ext(r)
 		if valueString != "" {
-			*fieldsOut = append(*fieldsOut, rz.String(key, valueString))
+			ev.Str(key, valueString)
 		}
 	}
 
@@ -153,7 +145,7 @@ func (_ *middleware) applyExtractors(
 		key := extractorsAny[i].key
 		valueAny := extractorsAny[i].ext(r)
 		if valueAny != nil {
-			*fieldsOut = append(*fieldsOut, rz.Any(key, valueAny))
+			ev.Any(key, valueAny)
 		}
 	}
 }
@@ -169,26 +161,13 @@ var _ ekaweb.Middleware = (*middleware)(nil)
 // You may pass some Option(s) to adjust its behaviour.
 func NewMiddleware(opts ...Option) ekaweb.Middleware {
 
-	const AttachedFieldsMinimum = 10
-
-	var m = middleware{}
-	var _log = log.Logger()
-	m.log = &_log
+	var m = middleware{log: log.Logger}
 
 	for i, n := 0, len(opts); i < n; i++ {
 		if opts[i] != nil {
 			opts[i](&m)
 		}
 	}
-
-	var n01 = len(m.fromOptions.extStrOnSuccess)
-	var n02 = len(m.fromOptions.extAnyOnSuccess)
-
-	var n11 = len(m.fromOptions.extStrOnFail)
-	var n12 = len(m.fromOptions.extAnyOnFail)
-
-	m.afterBuilding.fieldsNumberOnSuccess = AttachedFieldsMinimum + n01 + n02
-	m.afterBuilding.fieldsNumberOnFail = AttachedFieldsMinimum + n11 + n12
 
 	return &m
 }
