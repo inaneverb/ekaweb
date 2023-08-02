@@ -3,7 +3,7 @@ module github.com/inaneverb/ekaweb/logger/zerolog
 go 1.19
 
 require (
-	github.com/inaneverb/ekaweb v1.0.1
+	github.com/inaneverb/ekaweb v1.0.3
 	github.com/rs/zerolog v1.30.0
 )
 

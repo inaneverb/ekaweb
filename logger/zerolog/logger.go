@@ -102,7 +102,7 @@ func (m *middleware) Callback(next ekaweb.Handler) ekaweb.Handler {
 				mb.WriteString(TailSuccess)
 			}
 
-			ev = log.Debug()
+			ev = m.log.Debug()
 
 			extString = m.fromOptions.extStrOnSuccess
 			extAny = m.fromOptions.extAnyOnSuccess
@@ -111,7 +111,7 @@ func (m *middleware) Callback(next ekaweb.Handler) ekaweb.Handler {
 
 			mb.WriteString(TailFail)
 
-			ev = log.Error()
+			ev = m.log.Error()
 
 			extString = m.fromOptions.extStrOnFail
 			extAny = m.fromOptions.extAnyOnFail
