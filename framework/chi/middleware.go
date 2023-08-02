@@ -47,7 +47,7 @@ func (*MiddlewareCleanPathAndVariables) Callback(next ekaweb.Handler) ekaweb.Han
 		// thinking why you're getting "not found or not allowed"
 		// when everything is ok. So, just thoughts about futured me or you.
 
-		ekaweb_private.UkvsSetPathNotFoundOrNotAllowed(ctx, true)
+		ekaweb_private.UkvsSetPathNotFoundOrNotAllowed(ctx, false)
 
 		next.ServeHTTP(w, r)
 	})
@@ -68,7 +68,7 @@ func (*MiddlewareInvalidatePath) CheckErrorBefore() bool {
 
 func (*MiddlewareInvalidatePath) Callback(next ekaweb.Handler) ekaweb.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ekaweb_private.UkvsSetPathNotFoundOrNotAllowed(r.Context(), false)
+		ekaweb_private.UkvsSetPathNotFoundOrNotAllowed(r.Context(), true)
 		next.ServeHTTP(w, r)
 	})
 }

@@ -145,7 +145,6 @@ func (r *Router) reg(
 	components = append(components, NewCleanPathAndVariablesMiddleware())
 	// ------------------------------------------------------------------ //
 
-	components = append(components, NewInvalidatePathMiddleware())
 	components = append(components, componentsBak...)
 
 	checkError := ekaweb_private.NewCheckErrorMiddleware()
@@ -228,7 +227,9 @@ func NewRouter(options ...ekaweb.RouterOption) ekaweb.Router {
 
 	if doCoreInit {
 		var mCoreInit = ekaweb_private.NewCoreInitializerMiddleware()
-		middlewares = append([]ekaweb.Middleware{mCoreInit}, middlewares...)
+		var mInvalidatePath = NewInvalidatePathMiddleware()
+		middlewares = append(
+			[]ekaweb.Middleware{mCoreInit, mInvalidatePath}, middlewares...)
 	}
 
 	if len(customResponseHeaders) > 0 {

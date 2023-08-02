@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/inaneverb/ekacore/ekaunsafe/v4 v4.0.0
-	github.com/inaneverb/ekaweb v1.0.1
+	github.com/inaneverb/ekaweb v1.0.3
 )
 
 require (
