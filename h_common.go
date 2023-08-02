@@ -115,7 +115,11 @@ func URLVarGet(r *http.Request, key string) string {
 }
 
 func RoutePath(r *http.Request) string {
-	return ekaweb_private.UkvsGetOriginalPath(r.Context())
+	var path = ekaweb_private.UkvsGetOriginalPath(r.Context())
+	if path == "" {
+		path = r.URL.Path
+	}
+	return path
 }
 
 ////////////////////////////////////////////////////////////////////////////////
