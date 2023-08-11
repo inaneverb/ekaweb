@@ -56,6 +56,11 @@ type (
 	RouterOptionServerName struct {
 		ServerName string
 	}
+
+	RouterOptionTrailingSlash struct {
+		Redirect bool
+		Strip    bool
+	}
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -78,7 +83,12 @@ func (o *RouterOptionServerName) Name() string {
 	return "WithServerName"
 }
 
-func (o *RouterOptionErrorHandler) noOneCanImplementRouterOptionInterface() {}
-func (o *RouterOptionCustomJSON) noOneCanImplementRouterOptionInterface()   {}
-func (o *RouterOptionServerName) noOneCanImplementRouterOptionInterface()   {}
-func (o *RouterOptionCoreInit) noOneCanImplementRouterOptionInterface()     {}
+func (o *RouterOptionTrailingSlash) Name() string {
+	return "WithTrailingSlash"
+}
+
+func (o *RouterOptionErrorHandler) noOneCanImplementRouterOptionInterface()  {}
+func (o *RouterOptionCustomJSON) noOneCanImplementRouterOptionInterface()    {}
+func (o *RouterOptionServerName) noOneCanImplementRouterOptionInterface()    {}
+func (o *RouterOptionCoreInit) noOneCanImplementRouterOptionInterface()      {}
+func (o *RouterOptionTrailingSlash) noOneCanImplementRouterOptionInterface() {}

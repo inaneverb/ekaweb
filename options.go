@@ -26,6 +26,10 @@ func WithServerName(name string) RouterOption {
 	return &ekaweb_private.RouterOptionServerName{ServerName: name}
 }
 
+func WithTrailingSlash(redirect, strip bool) RouterOption {
+	return &ekaweb_private.RouterOptionTrailingSlash{Redirect: redirect, Strip: strip}
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 ///// CLIENT & SERVER OPTIONS //////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
