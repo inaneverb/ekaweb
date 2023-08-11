@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 
 	"github.com/inaneverb/ekacore/ekaunsafe/v4"
 	"github.com/inaneverb/ekaweb"
@@ -41,9 +42,9 @@ var _ ekaweb.Router = (*Router)(nil)
 
 func (r *Router) Use(components ...any) ekaweb.Router {
 
-	checkError := ekaweb_private.NewCheckErrorMiddleware()
-	middlewares, _ := ekaweb_private.BuildHandlerOut(components, checkError, true)
-	middlewaresRawFuncs := ekaweb_private.ConvertMiddlewaresToRawFuncs(middlewares)
+	var checkError = ekaweb_private.NewCheckErrorMiddleware()
+	var middlewares, _ = ekaweb_private.BuildHandlerOut(components, checkError, true)
+	var middlewaresRawFuncs = ekaweb_private.ConvertMiddlewaresToRawFuncs(middlewares)
 
 	r.origin.Use(middlewaresRawFuncs...)
 	return r
@@ -51,7 +52,7 @@ func (r *Router) Use(components ...any) ekaweb.Router {
 
 func (r *Router) Group(prefix string, middlewares ...any) ekaweb.Router {
 
-	child := newEmptyRouter(chi.NewRouter())
+	var child = newEmptyRouter(chi.NewRouter())
 	child.Use(middlewares...)
 
 	r.manifests = append(r.manifests, newChildManifest(prefix, child))
@@ -147,9 +148,9 @@ func (r *Router) reg(
 
 	components = append(components, componentsBak...)
 
-	checkError := ekaweb_private.NewCheckErrorMiddleware()
+	var checkError = ekaweb_private.NewCheckErrorMiddleware()
 
-	middlewares, handler := ekaweb_private.BuildHandlerOut(components, checkError, false)
+	var middlewares, handler = ekaweb_private.BuildHandlerOut(components, checkError, false)
 	handler = ekaweb_private.MergeMiddlewares(middlewares, handler)
 
 	originCallback(prefix, handler.ServeHTTP)
@@ -159,7 +160,7 @@ func (r *Router) reg(
 func (r *Router) reg2(
 	originCallback _ChiMuxBindFunc2, handler any) ekaweb.Router {
 
-	asHandler := ekaweb_private.AsHandler(handler)
+	var asHandler = ekaweb_private.AsHandler(handler)
 	if asHandler != nil {
 		originCallback(asHandler.ServeHTTP)
 	}
@@ -183,9 +184,9 @@ func newChildManifest(prefix string, child *Router) childManifest {
 ////////////////////////////////////////////////////////////////////////////////
 
 func NewRouter(options ...ekaweb.RouterOption) ekaweb.Router {
-	r := newEmptyRouter(chi.NewRouter())
+	var r = newEmptyRouter(chi.NewRouter())
 
-	middlewares := make([]ekaweb.Middleware, 0, 10)
+	var middlewares = make([]ekaweb.Middleware, 0, 10)
 	middlewares = append(middlewares)
 
 	var doCoreInit = true
@@ -209,6 +210,7 @@ func NewRouter(options ...ekaweb.RouterOption) ekaweb.Router {
 			if option.Decoder != nil {
 				jsonEncDec.Decoder = option.Decoder
 			}
+			//goland:noinspection GoImportUsedAsName
 			var middleware = ekaweb_private.NewJSONEncodeDecodeMiddleware(&jsonEncDec)
 			middlewares = append(middlewares, middleware)
 
@@ -219,7 +221,21 @@ func NewRouter(options ...ekaweb.RouterOption) ekaweb.Router {
 
 		case *ekaweb_private.RouterOptionErrorHandler:
 			if option.Handler != nil {
-				middleware := ekaweb_private.NewErrorHandlerMiddleware(option.Handler)
+				//goland:noinspection GoImportUsedAsName
+				var middleware = ekaweb_private.NewErrorHandlerMiddleware(option.Handler)
+				middlewares = append(middlewares, middleware)
+			}
+
+		case *ekaweb_private.RouterOptionTrailingSlash:
+			switch {
+			case option.Strip:
+				//goland:noinspection GoImportUsedAsName
+				var middleware = ekaweb.MiddlewareFunc(middleware.StripSlashes)
+				middlewares = append(middlewares, middleware)
+
+			case option.Redirect:
+				//goland:noinspection GoImportUsedAsName
+				var middleware = ekaweb.MiddlewareFunc(middleware.RedirectSlashes)
 				middlewares = append(middlewares, middleware)
 			}
 		}
@@ -228,16 +244,18 @@ func NewRouter(options ...ekaweb.RouterOption) ekaweb.Router {
 	if doCoreInit {
 		var mCoreInit = ekaweb_private.NewCoreInitializerMiddleware()
 		var mInvalidatePath = NewInvalidatePathMiddleware()
+		// prepend
 		middlewares = append(
 			[]ekaweb.Middleware{mCoreInit, mInvalidatePath}, middlewares...)
 	}
 
 	if len(customResponseHeaders) > 0 {
-		middleware := ekaweb_private.NewCustomResponseHeadersMiddleware(customResponseHeaders)
+		//goland:noinspection GoImportUsedAsName
+		var middleware = ekaweb_private.NewCustomResponseHeadersMiddleware(customResponseHeaders)
 		middlewares = append(middlewares, middleware)
 	}
 
-	middlewaresRawFuncs := ekaweb_private.ConvertMiddlewaresToRawFuncs(middlewares)
+	var middlewaresRawFuncs = ekaweb_private.ConvertMiddlewaresToRawFuncs(middlewares)
 	r.origin.Use(middlewaresRawFuncs...)
 
 	return r
