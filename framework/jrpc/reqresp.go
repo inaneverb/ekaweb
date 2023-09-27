@@ -11,16 +11,16 @@ import (
 )
 
 type jRpcRequest struct {
-	ID     string          `json:"id"`
+	ID     json.RawMessage `json:"id"`
 	Method string          `json:"method"`
 	Params json.RawMessage `json:"params"`
 }
 
 type jRpcResponse struct {
-	Header string `json:"jsonrpc"`
-	ID     string `json:"id,omitempty"`
-	Result any    `json:"result,omitempty"`
-	Error  any    `json:"error,omitempty"`
+	Header string          `json:"jsonrpc"`
+	ID     json.RawMessage `json:"id,omitempty"`
+	Result any             `json:"result,omitempty"`
+	Error  any             `json:"error,omitempty"`
 }
 
 func encDecMiddleware(next ekaweb.Handler) ekaweb.Handler {

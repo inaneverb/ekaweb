@@ -2,6 +2,7 @@ package ekaweb_jrpc
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 
 	"github.com/inaneverb/ekaweb/private"
@@ -24,17 +25,17 @@ func IsJRPC(r *http.Request) bool {
 	return IsJRPCByContext(r.Context())
 }
 
-func requestIdSave(ctx context.Context, id string) {
-	if id != "" {
+func requestIdSave(ctx context.Context, id json.RawMessage) {
+	if len(id) > 0 {
 		ekaweb_private.UkvsInsert(ctx, _ukvsJRpcRequestId{}, id)
 	}
 }
 
-func RequestIDByContext(ctx context.Context) string {
-	return ekaweb_private.UkvsGetOrDefault(ctx, _ukvsJRpcRequestId{}, "").(string)
+func RequestIDByContext(ctx context.Context) json.RawMessage {
+	return ekaweb_private.UkvsGetOrDefault(ctx, _ukvsJRpcRequestId{}, "").(json.RawMessage)
 }
 
-func RequestID(r *http.Request) string {
+func RequestID(r *http.Request) json.RawMessage {
 	return RequestIDByContext(r.Context())
 }
 
