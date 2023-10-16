@@ -1,6 +1,6 @@
 package ekaweb
 
-// HTTP Headers were copied from net/http.
+// HTTP Headers were copied from net/http with some additions.
 //
 //goland:noinspection GoUnusedConst
 const (
@@ -66,6 +66,7 @@ const (
 	HeaderXForwardedProtocol              = "X-Forwarded-Protocol"
 	HeaderXForwardedSsl                   = "X-Forwarded-Ssl"
 	HeaderXUrlScheme                      = "X-Url-Scheme"
+	HeaderXRealIP                         = "X-Real-IP"
 	HeaderLocation                        = "Location"
 	HeaderFrom                            = "From"
 	HeaderHost                            = "Host"

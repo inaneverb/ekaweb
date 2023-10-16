@@ -1,13 +1,17 @@
 package ekaweb_private
 
-// BuildHandlerOut parses all provided arguments and generates an out
-// middlewares and handler that could be registered in any cases.
+// BuildHandlerOut prepares outgoing set of middlewares + handler based
+// on provided 'components'.
+// It also "attaches" 'checkError' before each middleware, if it's allowed
+// ('checkError' is not nil, middleware has no "skip error check" behaviour).
+//
+// You can skip getting final handler, passing true as 3rd arg. In this case,
+// final handler will be transformed to middleware and added to outgoing set.
 func BuildHandlerOut(
-	components []any,
-	checkError Middleware,
+	components []any, checkError Middleware,
 	returnMiddlewaresOnly bool) ([]Middleware, Handler) {
 
-	enableCheckErrorGlobal := checkError != nil
+	var enableCheckErrorGlobal = checkError != nil
 
 	// Apply components. The rules (about error check skipping) are:
 	//
@@ -15,10 +19,10 @@ func BuildHandlerOut(
 	//    IS ALSO may be protected. It could be a call for HTTP group
 	//    and there could be an error before.
 	//
-	// 2. Protecting (middleware or handler) meaning that this item
+	// 2. "Protecting" (middleware or handler) means that this item
 	//    will be called only if there was no error before.
 	//
-	// 3. For middlewares we can just add CheckError middleware
+	// 3. For middlewares we can just add 'checkError' middleware
 	//    to the middlewares call stack. Easy.
 	//
 	// 4. For handlers, we're wrapping handler by the CheckError() call,
@@ -28,10 +32,10 @@ func BuildHandlerOut(
 	var handlersInRow []Handler
 	var handlersOut []Handler
 
-	addMiddleware := func(middleware Middleware, performCheckError bool) {
+	var addMiddleware = func(middleware Middleware, performCheckError bool) {
 		switch {
 		case len(handlersInRow) > 0 && len(middlewaresInRow) > 0:
-			tempHandler := MergeHandlers(handlersInRow)
+			var tempHandler = MergeHandlers(handlersInRow)
 			tempHandler = MergeMiddlewares(middlewaresInRow, tempHandler)
 			handlersOut = append(handlersOut, tempHandler)
 			handlersInRow = nil
@@ -42,7 +46,7 @@ func BuildHandlerOut(
 			handlersInRow = nil
 		}
 
-		asMiddlewareExtended, ok := middleware.(MiddlewareExtended)
+		var asMiddlewareExtended, ok = middleware.(MiddlewareExtended)
 
 		if performCheckError && (!ok || asMiddlewareExtended.CheckErrorBefore()) {
 			middlewaresInRow = append(middlewaresInRow, checkError)
@@ -50,8 +54,8 @@ func BuildHandlerOut(
 		middlewaresInRow = append(middlewaresInRow, middleware)
 	}
 
-	addHandler := func(handler Handler, performCheckError bool) {
-		asHandlerExtended, ok := handler.(HandlerExtended)
+	var addHandler = func(handler Handler, performCheckError bool) {
+		var asHandlerExtended, ok = handler.(HandlerExtended)
 
 		if performCheckError && (!ok || asHandlerExtended.CheckErrorBefore()) {
 			handler = checkError.Callback(handler)
@@ -59,12 +63,11 @@ func BuildHandlerOut(
 		handlersInRow = append(handlersInRow, handler)
 	}
 
-	for i, n := 0, len(components); i < n; i++ {
-		asMiddleware := AsMiddleware(components[i])
-		asHandler := AsHandler(components[i])
+	for _, component := range components {
+		var asMiddleware = AsMiddleware(component)
+		var asHandler = AsHandler(component)
 
 		switch {
-
 		case asMiddleware != nil:
 			addMiddleware(asMiddleware, enableCheckErrorGlobal)
 
@@ -79,7 +82,7 @@ func BuildHandlerOut(
 	}
 
 	if returnMiddlewaresOnly && handlerOut != nil {
-		asMiddleware := ConvertHandlerToMiddleware(handlerOut)
+		var asMiddleware = ConvertHandlerToMiddleware(handlerOut)
 		middlewaresInRow = append(middlewaresInRow, asMiddleware)
 		handlerOut = nil
 	}

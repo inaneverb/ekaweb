@@ -4,26 +4,23 @@ import (
 	"net/http"
 )
 
-// EmptyMiddleware is an empty middleware. It does nothing but returns
-// a passed types.Handler thus granting flow control to that.
+// EmptyMiddleware is an empty Middleware. It just gives the control
+// to the 'next' middleware. Has disabled error check before.
 type EmptyMiddleware struct{}
 
-func (*EmptyMiddleware) Callback(next Handler) Handler {
-	return next
-}
+func (*EmptyMiddleware) Callback(next Handler) Handler { return next }
 
-func NewEmptyMiddleware() Middleware {
-	return &EmptyMiddleware{}
-}
+func (*EmptyMiddleware) CheckErrorBefore() bool { return false }
+func NewEmptyMiddleware() Middleware            { return &EmptyMiddleware{} }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-// EmptyHandler is an empty types.Handler. It does nothing.
+// EmptyHandler is just an empty Handler. It does nothing.
+// Has disabled error check before.
 type EmptyHandler struct{}
 
-func (*EmptyHandler) ServeHTTP(_ http.ResponseWriter, _ *http.Request) {}
+func (*EmptyHandler) ServeHTTP(http.ResponseWriter, *http.Request) {}
 
-func NewEmptyHandler() Handler {
-	return &EmptyHandler{}
-}
+func (*EmptyHandler) CheckErrorBefore() bool { return false }
+func NewEmptyHandler() Handler               { return &EmptyHandler{} }

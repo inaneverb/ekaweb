@@ -1,5 +1,9 @@
 package ekaweb_private
 
+import (
+	"io"
+)
+
 type RouterSimple interface {
 	Reg(path string, middlewaresAndHandler ...any) RouterSimple
 	Build() Handler
@@ -31,8 +35,20 @@ type RouterOption interface {
 }
 
 type (
-	MarshalCallback   = func(v any) ([]byte, error)
-	UnmarshalCallback = func(data []byte, v any) error
+	// Encoder shall encode by some codec given object writing it to himself.
+	// Usually, the type that implements it, writes output to io.Writer.
+	Encoder interface {
+		Encode(e any) error
+	}
+
+	// Decoder shall decode data by some codec from itself to given object.
+	// Usually, the type that implements it, reads data from io.Reader.
+	Decoder interface {
+		Decode(to any) error
+	}
+
+	EncoderGetter = func(w io.Writer) Encoder // generic-less aliases
+	DecoderGetter = func(r io.Reader) Decoder // generic-less aliases
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -48,9 +64,9 @@ type (
 		Handler ErrorHandlerHTTP
 	}
 
-	RouterOptionCustomJSON struct {
-		Encoder MarshalCallback
-		Decoder UnmarshalCallback
+	RouterOptionCodec struct {
+		EncoderGetter EncoderGetter
+		DecoderGetter DecoderGetter
 	}
 
 	RouterOptionServerName struct {
@@ -75,8 +91,8 @@ func (o *RouterOptionErrorHandler) Name() string {
 	return "WithErrorHandler"
 }
 
-func (o *RouterOptionCustomJSON) Name() string {
-	return "WithCustomJSON"
+func (o *RouterOptionCodec) Name() string {
+	return "WithCodec"
 }
 
 func (o *RouterOptionServerName) Name() string {
@@ -88,7 +104,11 @@ func (o *RouterOptionTrailingSlash) Name() string {
 }
 
 func (o *RouterOptionErrorHandler) noOneCanImplementRouterOptionInterface()  {}
-func (o *RouterOptionCustomJSON) noOneCanImplementRouterOptionInterface()    {}
+func (o *RouterOptionCodec) noOneCanImplementRouterOptionInterface()         {}
 func (o *RouterOptionServerName) noOneCanImplementRouterOptionInterface()    {}
 func (o *RouterOptionCoreInit) noOneCanImplementRouterOptionInterface()      {}
 func (o *RouterOptionTrailingSlash) noOneCanImplementRouterOptionInterface() {}
+
+////////////////////////////////////////////////////////////////////////////////
+///// PRIVATE FUNCTIONS ////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////

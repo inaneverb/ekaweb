@@ -1,6 +1,8 @@
 package ekaweb
 
 import (
+	"encoding/json"
+	"io"
 	"time"
 
 	"github.com/inaneverb/ekaweb/private"
@@ -18,8 +20,39 @@ func WithErrorHandler(cb ekaweb_private.ErrorHandlerHTTP) RouterOption {
 	return &ekaweb_private.RouterOptionErrorHandler{Handler: cb}
 }
 
-func WithCustomJSON(enc ekaweb_private.MarshalCallback, dec ekaweb_private.UnmarshalCallback) RouterOption {
-	return &ekaweb_private.RouterOptionCustomJSON{Encoder: enc, Decoder: dec}
+// WithCodec returns an Option, that overwrites default codec (encoder or/and
+// decoder), which are defaulted to "encoding/json" Golang package.
+func WithCodec[E ekaweb_private.Encoder, D ekaweb_private.Decoder](
+	encGetter func(w io.Writer) E, decGetter func(r io.Reader) D) RouterOption {
+
+	var encGetterTransformed = wrapEncGetter(json.NewEncoder)
+	if encGetter != nil {
+		encGetterTransformed = wrapEncGetter(encGetter)
+	}
+
+	var decGetterTransformed = wrapDecGetter(json.NewDecoder)
+	if decGetter != nil {
+		decGetterTransformed = wrapDecGetter(decGetter)
+	}
+
+	return &ekaweb_private.RouterOptionCodec{
+		EncoderGetter: encGetterTransformed,
+		DecoderGetter: decGetterTransformed,
+	}
+}
+
+// wrapEncGetter returns _EncoderGetter from its generic variant.
+func wrapEncGetter[E ekaweb_private.Encoder](
+	encGetter func(w io.Writer) E) ekaweb_private.EncoderGetter {
+
+	return func(w io.Writer) ekaweb_private.Encoder { return encGetter(w) }
+}
+
+// wrapDecGetter returns _DecoderGetter from its generic variant.
+func wrapDecGetter[D ekaweb_private.Decoder](
+	decGetter func(r io.Reader) D) ekaweb_private.DecoderGetter {
+
+	return func(r io.Reader) ekaweb_private.Decoder { return decGetter(r) }
 }
 
 func WithServerName(name string) RouterOption {

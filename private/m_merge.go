@@ -2,15 +2,14 @@ package ekaweb_private
 
 import (
 	"net/http"
+	"slices"
 )
 
-// MergeHandlers just returns one handler that will call all provided
-// in a row, one-by-one.
-// If there's no provided handlers (empty array), an EmptyHandler is returned.
+// MergeHandlers just returns one handler that will call all given 'handlers'
+// in a row, one-by-one. If empty array is passed, an EmptyHandler is returned.
 //
-// WARNING!
-// There's no nil check for provided handlers.
-// It's your responsibility to call FilterNilHandlers firstly.
+// WARNING! No nil checks before. Filter handlers first if you have to.
+// See more: FilterNilHandlers().
 func MergeHandlers(handlers []Handler) Handler {
 
 	switch len(handlers) {
@@ -25,11 +24,35 @@ func MergeHandlers(handlers []Handler) Handler {
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		for i, n := 0, len(handlers); i < n; i++ {
-			handlers[i].ServeHTTP(w, r)
+		for _, handler := range handlers {
+			handler.ServeHTTP(w, r)
 		}
 	})
 }
+
+// MergeMiddlewares just returns one handler that wraps given 'handler'
+// by the all provided 'middlewares', one-by-one.
+// It means, that the whole chain of inner Middleware.Callback() calls,
+// that generates an output Handler is under construction exactly here.
+//
+// If there's no middlewares, provided handler is returned.
+//
+// WARNING!
+// No nil checks for anything. Filter middlewares/handler first if you have to.
+// See more: FilterNilMiddlewares(), FilterNilHandlers().
+func MergeMiddlewares(middlewares []Middleware, handler Handler) Handler {
+
+	slices.Reverse(middlewares)
+	for _, middleware := range middlewares {
+		handler = middleware.Callback(handler)
+	}
+
+	return handler
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///// PRIVATE METHODS //////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 // mergeTwoHandlers is a special case of MergeHandlers business logic.
 func mergeTwoHandlers(handler1, handler2 Handler) Handler {
@@ -37,25 +60,4 @@ func mergeTwoHandlers(handler1, handler2 Handler) Handler {
 		handler1.ServeHTTP(w, r)
 		handler2.ServeHTTP(w, r)
 	})
-}
-
-// MergeMiddlewares just returns one handler that will call:
-//   - Each provided middleware, one-by-one, passing next middleware
-//     to the current middleware function.
-//   - The last handler at the end.
-//
-// If there's no middlewares, a provided handler just returns.
-//
-// WARNING!
-// There's no nil check for provided middlewares & handler.
-// It's your responsibility to call FilterNilMiddlewares and/or
-// FilterNilHandlers firstly.
-func MergeMiddlewares(
-	middlewares []Middleware, handler Handler) Handler {
-
-	for i := len(middlewares) - 1; i >= 0; i-- {
-		handler = middlewares[i].Callback(handler)
-	}
-
-	return handler
 }
