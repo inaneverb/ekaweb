@@ -5,17 +5,17 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"github.com/inaneverb/ekaweb"
-	"github.com/inaneverb/ekaweb/private"
+	"github.com/inaneverb/ekaweb/v2"
+	"github.com/inaneverb/ekaweb/v2/private"
 )
 
-type MiddlewareCleanPathAndVariables struct{}
+type _MiddlewareCleanPathAndVariables struct{}
 
-func (*MiddlewareCleanPathAndVariables) CheckErrorBefore() bool {
+func (*_MiddlewareCleanPathAndVariables) CheckErrorBefore() bool {
 	return false
 }
 
-func (*MiddlewareCleanPathAndVariables) Callback(next ekaweb.Handler) ekaweb.Handler {
+func (*_MiddlewareCleanPathAndVariables) Callback(next ekaweb.Handler) ekaweb.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		ctx := r.Context()
@@ -53,26 +53,26 @@ func (*MiddlewareCleanPathAndVariables) Callback(next ekaweb.Handler) ekaweb.Han
 	})
 }
 
-func NewCleanPathAndVariablesMiddleware() ekaweb.Middleware {
-	return &MiddlewareCleanPathAndVariables{}
+func newCleanPathAndVariablesMiddleware() ekaweb.Middleware {
+	return &_MiddlewareCleanPathAndVariables{}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-type MiddlewareInvalidatePath struct{}
+type _MiddlewareInvalidatePath struct{}
 
-func (*MiddlewareInvalidatePath) CheckErrorBefore() bool {
+func (*_MiddlewareInvalidatePath) CheckErrorBefore() bool {
 	return false
 }
 
-func (*MiddlewareInvalidatePath) Callback(next ekaweb.Handler) ekaweb.Handler {
+func (*_MiddlewareInvalidatePath) Callback(next ekaweb.Handler) ekaweb.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ekaweb_private.UkvsSetPathNotFoundOrNotAllowed(r.Context(), true)
 		next.ServeHTTP(w, r)
 	})
 }
 
-func NewInvalidatePathMiddleware() ekaweb.Middleware {
-	return &MiddlewareInvalidatePath{}
+func newInvalidatePathMiddleware() ekaweb.Middleware {
+	return &_MiddlewareInvalidatePath{}
 }

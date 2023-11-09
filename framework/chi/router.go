@@ -1,6 +1,7 @@
 package ekaweb_chi
 
 import (
+	"encoding/json"
 	"net/http"
 	"strings"
 
@@ -8,8 +9,9 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 
 	"github.com/inaneverb/ekacore/ekaunsafe/v4"
-	"github.com/inaneverb/ekaweb"
-	"github.com/inaneverb/ekaweb/private"
+	"github.com/inaneverb/ekaweb/v2"
+	"github.com/inaneverb/ekaweb/v2/middleware"
+	"github.com/inaneverb/ekaweb/v2/private"
 )
 
 type Router struct {
@@ -135,7 +137,7 @@ func (r *Router) reg(
 		return r
 	}
 
-	componentsBak := components
+	var componentsBak = components
 	components = make([]any, 0, len(componentsBak)+1)
 
 	// ------------------------------------------------------------------ //
@@ -143,7 +145,7 @@ func (r *Router) reg(
 	// UNLESS YOU FULLY UNDERSTAND WHAT ARE YOU DOING.
 	// Possible bugs otherwise: Empty chi route context, empty URL variables.
 	// This middleware shouldn't be global, it must be path middleware's part.
-	components = append(components, NewCleanPathAndVariablesMiddleware())
+	components = append(components, newCleanPathAndVariablesMiddleware())
 	// ------------------------------------------------------------------ //
 
 	components = append(components, componentsBak...)
@@ -192,6 +194,9 @@ func NewRouter(options ...ekaweb.RouterOption) ekaweb.Router {
 	var doCoreInit = true
 	var customResponseHeaders = http.Header{}
 
+	var ukvsManager *ekaweb_private.UkvsManager
+	var optCodec *ekaweb_private.RouterOptionCodec
+
 	for i, n := 0, len(options); i < n; i++ {
 		if ekaunsafe.UnpackInterface(options[i]).Word == nil {
 			continue
@@ -202,17 +207,8 @@ func NewRouter(options ...ekaweb.RouterOption) ekaweb.Router {
 		case *ekaweb_private.RouterOptionCoreInit:
 			doCoreInit = option.Enable
 
-		case *ekaweb_private.RouterOptionCustomJSON:
-			var jsonEncDec ekaweb_private.RouterOptionCustomJSON
-			if option.Encoder != nil {
-				jsonEncDec.Encoder = option.Encoder
-			}
-			if option.Decoder != nil {
-				jsonEncDec.Decoder = option.Decoder
-			}
-			//goland:noinspection GoImportUsedAsName
-			var middleware = ekaweb_private.NewJSONEncodeDecodeMiddleware(&jsonEncDec)
-			middlewares = append(middlewares, middleware)
+		case *ekaweb_private.RouterOptionCodec:
+			optCodec = option
 
 		case *ekaweb_private.RouterOptionServerName:
 			if option.ServerName != "" {
@@ -221,38 +217,41 @@ func NewRouter(options ...ekaweb.RouterOption) ekaweb.Router {
 
 		case *ekaweb_private.RouterOptionErrorHandler:
 			if option.Handler != nil {
-				//goland:noinspection GoImportUsedAsName
-				var middleware = ekaweb_private.NewErrorHandlerMiddleware(option.Handler)
-				middlewares = append(middlewares, middleware)
+				var mErrorHandler = ekaweb_private.NewErrorHandlerMiddleware(option.Handler)
+				middlewares = append(middlewares, mErrorHandler)
 			}
 
 		case *ekaweb_private.RouterOptionTrailingSlash:
 			switch {
 			case option.Strip:
-				//goland:noinspection GoImportUsedAsName
-				var middleware = ekaweb.MiddlewareFunc(middleware.StripSlashes)
-				middlewares = append(middlewares, middleware)
+				var mStripSlashes = ekaweb.MiddlewareFunc(middleware.StripSlashes)
+				middlewares = append(middlewares, mStripSlashes)
 
 			case option.Redirect:
-				//goland:noinspection GoImportUsedAsName
-				var middleware = ekaweb.MiddlewareFunc(middleware.RedirectSlashes)
-				middlewares = append(middlewares, middleware)
+				var mRedirect = ekaweb.MiddlewareFunc(middleware.RedirectSlashes)
+				middlewares = append(middlewares, mRedirect)
 			}
 		}
 	}
 
 	if doCoreInit {
-		var mCoreInit = ekaweb_private.NewCoreInitializerMiddleware()
-		var mInvalidatePath = NewInvalidatePathMiddleware()
+		if ukvsManager == nil {
+			if optCodec == nil {
+				type T = ekaweb_private.RouterOptionCodec
+				optCodec = ekaweb.WithCodec(json.NewEncoder, json.NewDecoder).(*T)
+			}
+			var g = ekaweb_private.NewUkvsMapGeneratorSlice()
+			ukvsManager = ekaweb_private.NewUkvsManager(g, *optCodec)
+		}
+		var mCoreInit = ekaweb_private.NewUkvsManagerMiddleware(ukvsManager)
+		var mInvalidatePath = newInvalidatePathMiddleware()
 		// prepend
-		middlewares = append(
-			[]ekaweb.Middleware{mCoreInit, mInvalidatePath}, middlewares...)
+		middlewares = append([]ekaweb.Middleware{mCoreInit, mInvalidatePath}, middlewares...)
 	}
 
 	if len(customResponseHeaders) > 0 {
-		//goland:noinspection GoImportUsedAsName
-		var middleware = ekaweb_private.NewCustomResponseHeadersMiddleware(customResponseHeaders)
-		middlewares = append(middlewares, middleware)
+		var mCustomHeaders = ekaweb_middleware.CustomHeaders(customResponseHeaders)
+		middlewares = append(middlewares, mCustomHeaders)
 	}
 
 	var middlewaresRawFuncs = ekaweb_private.ConvertMiddlewaresToRawFuncs(middlewares)
