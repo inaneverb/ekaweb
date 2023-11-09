@@ -106,5 +106,8 @@ func ukvsGet(ctx context.Context) *_Ukvs {
 		var key = (*_UkvsContextKey)(nil)
 		rt, wd = ekaunsafe.UnpackInterface(ctx.Value(key)).Tuple()
 	}
+	if wd == nil {
+		panic("BUG: Not inside UKVS context; Did you forget to initialize router?")
+	}
 	return (*_UkvsContext)(wd).kvs
 }

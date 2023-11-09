@@ -19,7 +19,6 @@ func (m _UkvsManagerMiddleware) CheckErrorBefore() bool {
 func (m _UkvsManagerMiddleware) Callback(next Handler) Handler {
 	return HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var ctx = m.manager.InjectUkvs(r.Context())
-		r = r.WithContext(ctx)
 		next.ServeHTTP(w, r.WithContext(ctx))
 		m.manager.ReturnUkvs(ctx)
 	})
