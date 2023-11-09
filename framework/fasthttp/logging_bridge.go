@@ -1,7 +1,7 @@
 package ekaweb_fasthttp
 
 import (
-	"github.com/inaneverb/ekaweb"
+	"github.com/inaneverb/ekaweb/v2"
 	"github.com/valyala/fasthttp"
 )
 

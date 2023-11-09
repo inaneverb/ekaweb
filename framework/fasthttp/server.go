@@ -8,8 +8,8 @@ import (
 	"github.com/valyala/fasthttp/fasthttpadaptor"
 
 	"github.com/inaneverb/ekacore/ekaunsafe/v4"
-	"github.com/inaneverb/ekaweb"
-	"github.com/inaneverb/ekaweb/private"
+	"github.com/inaneverb/ekaweb/v2"
+	"github.com/inaneverb/ekaweb/v2/private"
 )
 
 type Server struct {
@@ -59,7 +59,6 @@ func NewServer(options ...ekaweb.ServerOption) ekaweb.Server {
 			if ekaunsafe.UnpackInterface(option.Handler).Word != nil {
 				server.origin.Handler =
 					fasthttpadaptor.NewFastHTTPHandler(option.Handler)
-
 			}
 
 		case *ekaweb_private.ServerOptionListenAddr:
