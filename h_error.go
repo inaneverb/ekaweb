@@ -3,7 +3,7 @@ package ekaweb
 import (
 	"net/http"
 
-	"github.com/inaneverb/ekaweb/private"
+	"github.com/inaneverb/ekaweb/v2/private"
 )
 
 func ErrorGet(r *http.Request) error {

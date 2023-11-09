@@ -3,7 +3,7 @@ package ekaweb_private_test
 import (
 	"testing"
 
-	"github.com/inaneverb/ekaweb/private"
+	"github.com/inaneverb/ekaweb/v2/private"
 )
 
 func TestBuildHandlerOut(t *testing.T) {

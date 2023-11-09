@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/inaneverb/ekaweb/private"
+	"github.com/inaneverb/ekaweb/v2/private"
 )
 
 func genHandlers(n int) []ekaweb_private.Handler {

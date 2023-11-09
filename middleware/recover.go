@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/inaneverb/ekaweb"
-	"github.com/inaneverb/ekaweb/private"
+	"github.com/inaneverb/ekaweb/v2"
+	"github.com/inaneverb/ekaweb/v2/private"
 )
 
 // Recover returns a new HTTP middleware, that prevents panics from 'next'

@@ -1,7 +1,7 @@
 package ekaweb
 
 import (
-	"github.com/inaneverb/ekaweb/private"
+	"github.com/inaneverb/ekaweb/v2/private"
 )
 
 type Handler = ekaweb_private.Handler

@@ -3,7 +3,7 @@ package ekaweb_middleware
 import (
 	"net/http"
 
-	"github.com/inaneverb/ekaweb"
+	"github.com/inaneverb/ekaweb/v2"
 )
 
 // ForwardRequestID returns a new HTTP middleware, that will copy header

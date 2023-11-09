@@ -5,7 +5,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/inaneverb/ekaweb/private"
+	"github.com/inaneverb/ekaweb/v2/private"
 )
 
 ////////////////////////////////////////////////////////////////////////////////

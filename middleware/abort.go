@@ -3,8 +3,8 @@ package ekaweb_middleware
 import (
 	"net/http"
 
-	"github.com/inaneverb/ekaweb"
-	"github.com/inaneverb/ekaweb/private"
+	"github.com/inaneverb/ekaweb/v2"
+	"github.com/inaneverb/ekaweb/v2/private"
 )
 
 // AbortWith returns a new HTTP middleware, that always fails processing

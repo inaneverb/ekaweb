@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/inaneverb/ekaweb/private"
+	"github.com/inaneverb/ekaweb/v2/private"
 )
 
 func bUkvsInsertStdCtx(size int) (string, func(b *testing.B)) {

@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/inaneverb/ekaweb/private"
+	"github.com/inaneverb/ekaweb/v2/private"
 )
 
 // Option is a callback that allows to modify some WebSocket provider behaviour.

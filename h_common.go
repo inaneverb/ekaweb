@@ -10,7 +10,7 @@ import (
 	"github.com/inaneverb/ekacore/ekaarr/v4"
 	"github.com/inaneverb/ekacore/ekaunsafe/v4"
 
-	"github.com/inaneverb/ekaweb/private"
+	"github.com/inaneverb/ekaweb/v2/private"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
