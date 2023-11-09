@@ -63,6 +63,10 @@ func WithTrailingSlash(redirect, strip bool) RouterOption {
 	return &ekaweb_private.RouterOptionTrailingSlash{Redirect: redirect, Strip: strip}
 }
 
+func WithUkvsManager(manager *ekaweb_private.UkvsManager) RouterOption {
+	return &ekaweb_private.RouterOptionUkvsManager{Manager: manager}
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 ///// CLIENT & SERVER OPTIONS //////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

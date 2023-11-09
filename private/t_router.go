@@ -77,6 +77,10 @@ type (
 		Redirect bool
 		Strip    bool
 	}
+
+	RouterOptionUkvsManager struct {
+		Manager *UkvsManager
+	}
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -103,11 +107,16 @@ func (o *RouterOptionTrailingSlash) Name() string {
 	return "WithTrailingSlash"
 }
 
+func (o *RouterOptionUkvsManager) Name() string {
+	return "WithUkvsManager"
+}
+
 func (o *RouterOptionErrorHandler) noOneCanImplementRouterOptionInterface()  {}
 func (o *RouterOptionCodec) noOneCanImplementRouterOptionInterface()         {}
 func (o *RouterOptionServerName) noOneCanImplementRouterOptionInterface()    {}
 func (o *RouterOptionCoreInit) noOneCanImplementRouterOptionInterface()      {}
 func (o *RouterOptionTrailingSlash) noOneCanImplementRouterOptionInterface() {}
+func (o *RouterOptionUkvsManager) noOneCanImplementRouterOptionInterface()   {}
 
 ////////////////////////////////////////////////////////////////////////////////
 ///// PRIVATE FUNCTIONS ////////////////////////////////////////////////////////
