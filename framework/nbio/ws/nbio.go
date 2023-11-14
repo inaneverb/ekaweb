@@ -9,8 +9,8 @@ import (
 	"github.com/lesismal/nbio/mempool"
 	"github.com/lesismal/nbio/nbhttp/websocket"
 
-	"github.com/inaneverb/ekaweb"
-	"github.com/inaneverb/ekaweb/private"
+	"github.com/inaneverb/ekaweb/v2"
+	"github.com/inaneverb/ekaweb/v2/private"
 )
 
 type _NbioWebSocketOnOpenCallback = func(conn *websocket.Conn)
@@ -28,7 +28,7 @@ func NewHandler(handler Handler, options ...Option) ekaweb.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx, cancelFunc := duplicateHTTPRequestContext(r.Context())
 
-		var customUpgradeHeaders = ekaweb_private.UkvsGetResponseCustomHeaders(ctx)
+		var customUpgradeHeaders = w.Header()
 		var optionsHeadersPresent = len(optionsSet.ResponseHeaders) > 0
 		var customUpgradeHeadersPresent = len(customUpgradeHeaders) > 0
 
@@ -36,7 +36,7 @@ func NewHandler(handler Handler, options ...Option) ekaweb.Handler {
 
 		case optionsHeadersPresent && customUpgradeHeadersPresent:
 			h1 := optionsSet.ResponseHeaders.Clone()
-			customUpgradeHeaders = ekaweb.CopyHeaders(customUpgradeHeaders, h1)
+			customUpgradeHeaders = ekaweb.HeadersMerge(customUpgradeHeaders, h1, true)
 
 		case optionsHeadersPresent:
 			customUpgradeHeaders = optionsSet.ResponseHeaders

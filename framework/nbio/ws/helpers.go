@@ -3,8 +3,8 @@ package ekaweb_nbiows
 import (
 	"context"
 
-	"github.com/inaneverb/ekaweb/private"
-	"github.com/inaneverb/ekaweb/websocket"
+	"github.com/inaneverb/ekaweb/v2/private"
+	"github.com/inaneverb/ekaweb/v2/websocket"
 )
 
 // These aliases are exist just because I hate named imports
@@ -55,5 +55,5 @@ func applyErrorHandler(conn *Conn, err error) {
 }
 
 func duplicateHTTPRequestContext(ctx context.Context) (context.Context, func()) {
-	return context.WithCancel(ekaweb_private.UkvsPropagate(ctx, context.Background()))
+	return context.WithCancel(ekaweb_private.UkvsStealTo(ctx, context.Background()))
 }

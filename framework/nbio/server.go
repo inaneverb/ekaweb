@@ -3,12 +3,12 @@ package ekaweb_nbio
 import (
 	"strings"
 
+	"github.com/inaneverb/ekacore/ekaunsafe/v4"
+	"github.com/inaneverb/ekaweb/v2"
+	"github.com/inaneverb/ekaweb/v2/private"
+
 	"github.com/lesismal/nbio/logging"
 	"github.com/lesismal/nbio/nbhttp"
-
-	"github.com/inaneverb/ekacore/ekaunsafe/v4"
-	"github.com/inaneverb/ekaweb"
-	"github.com/inaneverb/ekaweb/private"
 )
 
 type Server struct {
