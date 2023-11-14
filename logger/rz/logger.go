@@ -8,8 +8,8 @@ import (
 	"github.com/skerkour/rz"
 	"github.com/skerkour/rz/log"
 
-	"github.com/inaneverb/ekaweb"
-	"github.com/inaneverb/ekaweb/private"
+	"github.com/inaneverb/ekaweb/v2"
+	"github.com/inaneverb/ekaweb/v2/private"
 )
 
 type (
