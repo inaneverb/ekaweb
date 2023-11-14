@@ -58,11 +58,7 @@ func HeaderContain(r *http.Request, key, value string) bool {
 // If 'a' is not nil, it copies headers from 'b' to 'a', returning modified 'a'.
 func HeadersMerge(a, b http.Header, checkDuplicates bool) http.Header {
 
-	switch {
-	case len(a) == 0:
-		return b
-
-	case len(b) == 0:
+	if len(b) == 0 {
 		return a
 	}
 
