@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/inaneverb/ekaweb"
+	"github.com/inaneverb/ekaweb/v2"
 )
 
 //goland:noinspection GoErrorStringFormat
@@ -20,6 +20,7 @@ var (
 // if it's nil - an error is occurred (and already saved).
 //
 // Rules:
+//
 //   - You don't have to worry about allocations, check max limit, etc.
 //     Just provide max allowed memory, and all of that will be encapsulated.
 //

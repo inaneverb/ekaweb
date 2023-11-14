@@ -11,9 +11,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/goccy/go-json"
-
-	"github.com/inaneverb/ekaweb/private"
+	"github.com/inaneverb/ekaweb/v2/private"
 )
 
 type jsonBinding struct{}
@@ -34,30 +32,9 @@ func (jsonBinding) BindBody(body []byte, obj any) error {
 }
 
 func decodeJSON(ctx context.Context, r io.Reader, obj any) error {
-
-	var data, err = io.ReadAll(r)
-	if err != nil && err != io.EOF {
+	var err = ekaweb_private.DecodeStream(ctx, r, obj)
+	if err != nil {
 		return err
 	}
-
-	if err = ekaweb_private.DecodeJSON(ctx, data, obj); err != nil {
-		return err
-	}
-
-	var jsonEncDec *ekaweb_private.RouterOptionCustomJSON = nil
-	if ctx != nil {
-		jsonEncDec = ekaweb_private.UkvsGetJSONEncoderDecoder(ctx)
-	}
-
-	if jsonEncDec != nil && jsonEncDec.Decoder != nil {
-		err = jsonEncDec.Decoder(data, obj)
-	} else {
-		err = json.Unmarshal(data, obj)
-	}
-
-	if err != nil && err != io.EOF {
-		return err
-	}
-
 	return validate(obj)
 }

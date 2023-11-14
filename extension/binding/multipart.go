@@ -5,7 +5,7 @@ import (
 	"mime/multipart"
 	"net/http"
 
-	"github.com/inaneverb/ekaweb"
+	"github.com/inaneverb/ekaweb/v2"
 )
 
 //goland:noinspection GoErrorStringFormat
@@ -20,6 +20,7 @@ var (
 // but w/o their limitations and more convenient signature.
 //
 // Rules:
+//
 //   - You don't have to specify filename (`name` parameter).
 //     Don't know which filename user will use? No problem, get exactly that one
 //     that used provides (if only one was provided, error otherwise).

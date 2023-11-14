@@ -5,6 +5,7 @@
 package ekaweb_bind
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"reflect"
@@ -12,7 +13,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/goccy/go-json"
 	"github.com/inaneverb/ekacore/ekaunsafe/v4"
 )
 

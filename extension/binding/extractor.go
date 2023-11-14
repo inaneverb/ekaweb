@@ -9,7 +9,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	entr "github.com/go-playground/validator/v10/translations/en"
 
-	"github.com/inaneverb/ekaweb/extension/respondent"
+	"github.com/inaneverb/ekaweb/extension/respondent/v2"
 )
 
 var (
