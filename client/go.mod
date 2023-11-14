@@ -1,10 +1,10 @@
-module github.com/inaneverb/ekaweb/client
+module github.com/inaneverb/ekaweb/client/v2
 
 go 1.21.0
 
 require (
 	github.com/goccy/go-json v0.10.2
-	github.com/inaneverb/ekaweb v1.1.1
+	github.com/inaneverb/ekaweb/v2 v2.0.4
 	github.com/stretchr/testify v1.8.2
 )
 

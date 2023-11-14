@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/inaneverb/ekaweb/private"
+	"github.com/inaneverb/ekaweb/v2/private"
 )
 
 // TODO: This is not optimized version of URI query encoding.

@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/inaneverb/ekaweb/client"
+	"github.com/inaneverb/ekaweb/client/v2"
 )
 
 type T struct {
