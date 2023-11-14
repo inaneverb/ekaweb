@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/inaneverb/ekacore/ekaunsafe/v4"
-	"github.com/inaneverb/ekaweb"
+	"github.com/inaneverb/ekaweb/v2"
 )
 
 // respondent is a combination of Replacer, Expander and Applicator
