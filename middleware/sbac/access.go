@@ -3,7 +3,7 @@ package ekaweb_sbac
 import (
 	"context"
 
-	"github.com/inaneverb/ekaweb/private"
+	"github.com/inaneverb/ekaweb/v2/private"
 )
 
 type (
