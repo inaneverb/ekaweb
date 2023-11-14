@@ -1,7 +1,7 @@
 package ekaweb_noop
 
 import (
-	"github.com/inaneverb/ekaweb"
+	"github.com/inaneverb/ekaweb/v2"
 )
 
 type nopeServer struct{}

@@ -1,8 +1,8 @@
 package ekaweb_noop
 
 import (
-	"github.com/inaneverb/ekaweb"
-	"github.com/inaneverb/ekaweb/private"
+	"github.com/inaneverb/ekaweb/v2"
+	"github.com/inaneverb/ekaweb/v2/private"
 )
 
 type nopeRouterSimple struct{}
