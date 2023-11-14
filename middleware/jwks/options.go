@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/inaneverb/ekaweb"
+	"github.com/inaneverb/ekaweb/v2"
 )
 
 // Option is a callback that allows to modify Middleware under its construction.
