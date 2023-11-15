@@ -126,6 +126,10 @@ func (m *middleware) Callback(next ekaweb.Handler) ekaweb.Handler {
 			releaseBuffer(bufResp)
 		}
 
+		if len(attrs) > 0 {
+			span.SetAttributes(attrs...)
+		}
+
 		if err := ekaweb.ErrorGet(r); err != nil {
 			span.SetStatus(codes.Error, err.Error())
 		}
