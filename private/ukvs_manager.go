@@ -3,6 +3,7 @@ package ekaweb_private
 import (
 	"context"
 	"sync"
+	"unsafe"
 
 	"github.com/inaneverb/ekacore/ekaunsafe/v4"
 )
@@ -45,7 +46,6 @@ func NewUkvsManager[M UkvsMap](
 func UkvsStealTo(from, to context.Context) context.Context {
 	var kvs = ukvsGet(from)
 	kvs.flags |= _UkvsFlagIsStolen
-	panic("fwefwef")
 	return context.WithValue(to, _UkvsContextKey{}, kvs)
 }
 
@@ -102,12 +102,14 @@ func (u *UkvsManager) releaseUkvs(kvs *_Ukvs, force bool) {
 // ukvsGet extracts and returns a _Ukvs from the given context.Context.
 func ukvsGet(ctx context.Context) *_Ukvs {
 	var rt, wd = ekaunsafe.UnpackInterface(ctx).Tuple()
-	if rt != rtypeContext {
+	if rt == rtypeContext {
+		wd = unsafe.Pointer((*_UkvsContext)(wd).kvs)
+	} else {
 		var key = (*_UkvsContextKey)(nil)
-		rt, wd = ekaunsafe.UnpackInterface(ctx.Value(key)).Tuple()
+		wd = ekaunsafe.UnpackInterface(ctx.Value(key)).Word // slow case
 	}
 	if wd == nil {
 		panic("BUG: Not inside UKVS context; Did you forget to initialize router?")
 	}
-	return (*_UkvsContext)(wd).kvs
+	return (*_Ukvs)(wd)
 }
