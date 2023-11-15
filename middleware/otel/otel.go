@@ -40,10 +40,8 @@ func New(opts ...Option) ekaweb.Middleware {
 func (m *middleware) Callback(next ekaweb.Handler) ekaweb.Handler {
 
 	const (
-		AttributeKeyRequestHeaders  = "http.request.headers.data"
-		AttributeKeyRequestBody     = "http.request.body.data"
-		AttributeKeyResponseHeaders = "http.response.headers.data"
-		AttributeKeyResponseBody    = "http.response.body.data"
+		AttributeKeyHeaders = "Headers"
+		AttributeKeyBody    = "Body"
 	)
 
 	return ekaweb.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -77,7 +75,7 @@ func (m *middleware) Callback(next ekaweb.Handler) ekaweb.Handler {
 			//defer releaseBuffer(bufReq) // w/o defer placed below
 
 			if m.addRequestBody {
-				r.Body = wrapRequestBody(r.Body, bufReq.body)
+				r.Body = wrapRequestBody(r.Body, bufReq.body) // <- R wrapping
 			}
 			if m.addRequestHeaders {
 				flushHeaders(bufReq, r.Header)
@@ -89,32 +87,59 @@ func (m *middleware) Callback(next ekaweb.Handler) ekaweb.Handler {
 			//defer releaseBuffer(bufResp) // w/o defer placed below
 
 			if m.addResponseBody {
-				w = wrapResponse(w, bufResp.body)
+				w = wrapResponse(w, bufResp.body) // <- W wrapping
 			}
 		}
 
 		span.SetAttributes(attrs...)
 		next.ServeHTTP(w, r)
 
+		// WARNING!
+		// We should flush headers only after executing inner handler,
+		// because headers are stored inside http.ResponseWriter and they
+		// will be filled by the inner handler.
+
 		if m.addResponseHeaders {
 			flushHeaders(bufResp, w.Header())
 		}
 
-		attrs = attrs[:0]
+		//attrs = attrs[:0]
 
 		// In all these calls like `buf.<kind>.String()` makes a copy of []byte,
 		// returning it as a string. Thus, it's safe to return these buffers
 		// to the pool later.
 
-		m.addReqRespItem(&attrs, AttributeKeyRequestHeaders,
-			bufReq.headers, m.addRequestHeaders)
-		m.addReqRespItem(&attrs, AttributeKeyRequestBody,
-			bufReq.body, m.addRequestBody)
+		// Add request details as an event (log) to the span, if required.
 
-		m.addReqRespItem(&attrs, AttributeKeyResponseHeaders,
-			bufResp.headers, m.addResponseHeaders)
-		m.addReqRespItem(&attrs, AttributeKeyResponseBody,
-			bufResp.body, m.addResponseBody)
+		if m.addRequestHeaders || m.addRequestBody {
+			attrs = attrs[:0]
+
+			if m.addRequestHeaders {
+				attrs = append(attrs, attribute.String(
+					AttributeKeyHeaders, bufReq.headers.String()))
+			}
+			if m.addRequestBody {
+				attrs = append(attrs, attribute.String(
+					AttributeKeyBody, bufReq.body.String()))
+			}
+			span.AddEvent("Request details", trace.WithAttributes(attrs...))
+		}
+
+		// Add response details as an event (log) to the span, if required.
+
+		if m.addResponseHeaders || m.addResponseBody {
+			attrs = attrs[:0]
+
+			if m.addResponseHeaders {
+				attrs = append(attrs, attribute.String(
+					AttributeKeyHeaders, bufResp.headers.String()))
+			}
+			if m.addResponseBody {
+				attrs = append(attrs, attribute.String(
+					AttributeKeyBody, bufResp.body.String()))
+			}
+			span.AddEvent("Response details", trace.WithAttributes(attrs...))
+		}
 
 		// To avoid multiple checks, we can just check whether buffer pointer
 		// is not nil (thus buffers were allocated).
@@ -126,9 +151,9 @@ func (m *middleware) Callback(next ekaweb.Handler) ekaweb.Handler {
 			releaseBuffer(bufResp)
 		}
 
-		if len(attrs) > 0 {
-			span.SetAttributes(attrs...)
-		}
+		//if len(attrs) > 0 {
+		//	span.SetAttributes(attrs...)
+		//}
 
 		if err := ekaweb.ErrorGet(r); err != nil {
 			span.SetStatus(codes.Error, err.Error())
@@ -146,7 +171,7 @@ func (_ *middleware) addReqRespItem(
 	to *[]attribute.KeyValue, key string, buf *bytes.Buffer, check bool) {
 
 	// buf.String() here makes a copy of underlying that.
-	// Thus it's safe to reuse this buffer later.
+	// Thus, it's safe to reuse this buffer later.
 
 	if check {
 		*to = append(*to, attribute.String(key, buf.String()))
