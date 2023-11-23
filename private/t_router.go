@@ -5,7 +5,7 @@ import (
 )
 
 type RouterSimple interface {
-	Use(middlewares ...any) Router
+	Use(middlewares ...any) RouterSimple
 	Reg(path string, middlewaresAndHandler ...any) RouterSimple
 	Build() Handler
 }
