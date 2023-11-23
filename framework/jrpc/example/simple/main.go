@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/inaneverb/ekaweb/framework/jrpc/v2"
@@ -14,9 +15,17 @@ func main() {
 	}
 
 	var r = ekaweb_jrpc.NewRouter(opts...).
+		Use(middleware).
 		Reg("main", handler)
 
 	panic(http.ListenAndServe(":8081", r.Build()))
+}
+
+func middleware(next ekaweb.Handler) ekaweb.Handler {
+	return ekaweb.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("HELLO FROM MIDDLEWARE")
+		next.ServeHTTP(w, r)
+	})
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
