@@ -53,9 +53,11 @@ func (m *middleware) Callback(next ekaweb.Handler) ekaweb.Handler {
 		}
 
 		var attrs = make([]attribute.KeyValue, 0, 4)
-		var routePath = ekaweb.RoutePath(r)
 
-		span.SetName(r.Method + " " + routePath)
+		var routePath = ekaweb.RoutePath(r)
+		var httpMethod = r.Method
+
+		span.SetName(httpMethod + " " + routePath)
 		attrs = append(attrs, semconv.HTTPRouteKey.String(routePath))
 
 		if r.URL != nil {
@@ -92,7 +94,10 @@ func (m *middleware) Callback(next ekaweb.Handler) ekaweb.Handler {
 		}
 
 		span.SetAttributes(attrs...)
+
+		// ################################################################## //
 		next.ServeHTTP(w, r)
+		// ################################################################## //
 
 		// WARNING!
 		// We should flush headers only after executing inner handler,
@@ -151,9 +156,19 @@ func (m *middleware) Callback(next ekaweb.Handler) ekaweb.Handler {
 			releaseBuffer(bufResp)
 		}
 
-		//if len(attrs) > 0 {
-		//	span.SetAttributes(attrs...)
-		//}
+		// Maybe HTTP method or/and route path was changed?
+
+		var wasChanged = r.Method != httpMethod
+		if !wasChanged {
+			var newRoutePath = ekaweb.RoutePath(r)
+			if wasChanged = routePath != newRoutePath; wasChanged {
+				routePath = newRoutePath
+			}
+		}
+
+		if wasChanged {
+			span.SetName(r.Method + " " + routePath)
+		}
 
 		if err := ekaweb.ErrorGet(r); err != nil {
 			span.SetStatus(codes.Error, err.Error())
