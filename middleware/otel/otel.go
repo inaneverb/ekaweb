@@ -22,6 +22,7 @@ type middleware struct {
 	addRequestBody     bool
 	addResponseHeaders bool
 	addResponseBody    bool
+	recheckMethodPath  bool
 }
 
 // New creates a new OpenTelemetry middleware.
@@ -166,8 +167,13 @@ func (m *middleware) Callback(next ekaweb.Handler) ekaweb.Handler {
 			}
 		}
 
-		if wasChanged {
-			span.SetName(r.Method + " " + routePath)
+		if m.recheckMethodPath {
+			var newHttpMethod = r.Method
+			var newRoutePath = ekaweb.RoutePath(r)
+
+			if newHttpMethod != httpMethod || newRoutePath != routePath {
+				span.SetName(newHttpMethod + " " + newRoutePath)
+			}
 		}
 
 		if err := ekaweb.ErrorGet(r); err != nil {

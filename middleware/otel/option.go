@@ -32,3 +32,12 @@ func WithResponseData(addHeaders, addBody bool) Option {
 		m.addResponseHeaders, m.addResponseBody = addHeaders, addBody
 	}
 }
+
+// WithRecheckMethodPath adds additional recheck that HTTP method or/and
+// path was changed during call of next ekaweb.Handler and if it so,
+// changes span name to the new one.
+func WithRecheckMethodPath(enable ...bool) Option {
+	return func(m *middleware) {
+		m.recheckMethodPath = !(len(enable) > 0 && !enable[0])
+	}
+}
