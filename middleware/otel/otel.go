@@ -159,14 +159,6 @@ func (m *middleware) Callback(next ekaweb.Handler) ekaweb.Handler {
 
 		// Maybe HTTP method or/and route path was changed?
 
-		var wasChanged = r.Method != httpMethod
-		if !wasChanged {
-			var newRoutePath = ekaweb.RoutePath(r)
-			if wasChanged = routePath != newRoutePath; wasChanged {
-				routePath = newRoutePath
-			}
-		}
-
 		if m.recheckMethodPath {
 			var newHttpMethod = r.Method
 			var newRoutePath = ekaweb.RoutePath(r)

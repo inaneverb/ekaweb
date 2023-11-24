@@ -18,4 +18,5 @@ require (
 retract (
 	v2.0.0 // Bug: Request, Response are not included to span if required
 	v2.0.3 // Bug: Incorrect re-check changed HTTP method, path; fixed in 2.0.4
+	v2.0.4 // Bug: Dead code; fixed in 2.0.5
 )
