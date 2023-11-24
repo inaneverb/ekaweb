@@ -94,7 +94,9 @@ func (u *UkvsManager) releaseUkvs(kvs *_Ukvs, force bool) {
 
 	kvs.mgr = nil
 	kvs.err = nil
+	kvs.errD = ""
 	kvs.flags = 0
+	kvs.uri = ""
 
 	u.pool.Put(kvs)
 }
