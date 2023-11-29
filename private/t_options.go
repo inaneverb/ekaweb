@@ -1,6 +1,7 @@
 package ekaweb_private
 
 import (
+	"net/http"
 	"time"
 )
 
@@ -35,6 +36,10 @@ type ServerOption interface {
 	noOneCanImplementServerOptionInterface()
 }
 
+type ServerOptionTransport struct {
+	Transport http.RoundTripper
+}
+
 type ServerOptionHandler struct {
 	Handler Handler
 }
@@ -46,6 +51,10 @@ type ServerOptionListenAddr struct {
 type ServerOptionKeepAlive struct {
 	Enabled  bool
 	Duration time.Duration
+}
+
+func (o *ServerOptionTransport) Name() string {
+	return "WithTransport"
 }
 
 func (o *ServerOptionHandler) Name() string {
@@ -60,6 +69,7 @@ func (o *ServerOptionKeepAlive) Name() string {
 	return "WithKeepAlive"
 }
 
+func (o *ServerOptionTransport) noOneCanImplementServerOptionInterface()  {}
 func (o *ServerOptionHandler) noOneCanImplementServerOptionInterface()    {}
 func (o *ServerOptionListenAddr) noOneCanImplementServerOptionInterface() {}
 func (o *ServerOptionKeepAlive) noOneCanImplementServerOptionInterface()  {}

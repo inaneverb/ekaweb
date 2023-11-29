@@ -3,6 +3,7 @@ package ekaweb
 import (
 	"encoding/json"
 	"io"
+	"net/http"
 	"time"
 
 	"github.com/inaneverb/ekaweb/v2/private"
@@ -84,6 +85,10 @@ func WithTimeouts(readTimeout, writeTimeout time.Duration) ClientServerOption {
 ////////////////////////////////////////////////////////////////////////////////
 ///// SERVER OPTIONS ///////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+
+func WithTransport(transport http.RoundTripper) ServerOption {
+	return &ekaweb_private.ServerOptionTransport{Transport: transport}
+}
 
 func WithHandler(handler ekaweb_private.Handler) ServerOption {
 	return &ekaweb_private.ServerOptionHandler{Handler: handler}
