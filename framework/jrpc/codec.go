@@ -41,6 +41,10 @@ type (
 	}
 )
 
+var (
+	gJsonNullValue = []byte("null") // const value JSON representation
+)
+
 // newConnectedEncodeGetter creates and returns a new
 // ekaweb_private.EncoderGetter that is closures given context.Context,
 // jRPC request's ID and original ekaweb_private.EncoderGetter.
@@ -61,6 +65,9 @@ func newConnectedEncodeGetter(
 // jRPC requirements.
 func (je _JRpcEncoder) Encode(v any) error {
 	var resp = _JRpcResponse{"2.0", je.jCtx.RequestID, v, nil}
+	if je.jCtx.RequestID == nil {
+		je.jCtx.RequestID = gJsonNullValue
+	}
 
 	if ekaweb_private.UkvsGetUserError(je.ctx) != nil {
 		resp.Error, resp.Result = resp.Result, nil
