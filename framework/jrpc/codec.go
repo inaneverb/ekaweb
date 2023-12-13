@@ -65,8 +65,8 @@ func newConnectedEncodeGetter(
 // jRPC requirements.
 func (je _JRpcEncoder) Encode(v any) error {
 	var resp = _JRpcResponse{"2.0", je.jCtx.RequestID, v, nil}
-	if je.jCtx.RequestID == nil {
-		je.jCtx.RequestID = gJsonNullValue
+	if len(resp.ID) == 0 {
+		resp.ID = gJsonNullValue
 	}
 
 	if ekaweb_private.UkvsGetUserError(je.ctx) != nil {
