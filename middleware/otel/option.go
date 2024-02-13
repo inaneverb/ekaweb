@@ -41,3 +41,13 @@ func WithRecheckMethodPath(enable ...bool) Option {
 		m.recheckMethodPath = !(len(enable) > 0 && !enable[0])
 	}
 }
+
+// WithInvalidAttributeCallback sets up a callback that will be executed,
+// if any of OpenTelemetry attribute (Header or Body) in any source
+// (Request or Response) is not valid (mostly because of invalid UTF-8)
+// and invalid data will be passed to that callback.
+func WithInvalidAttributeCallback(cb func(s string)) Option {
+	return func(m *middleware) {
+		m.cbAttributeInvalid = cb
+	}
+}

@@ -3,6 +3,7 @@ package ekaweb_otel
 import (
 	"bytes"
 	"net/http"
+	"unicode/utf8"
 
 	"github.com/inaneverb/ekaweb/v2"
 
@@ -23,6 +24,7 @@ type middleware struct {
 	addResponseHeaders bool
 	addResponseBody    bool
 	recheckMethodPath  bool
+	cbAttributeInvalid func(s string)
 }
 
 // New creates a new OpenTelemetry middleware.
@@ -121,12 +123,10 @@ func (m *middleware) Callback(next ekaweb.Handler) ekaweb.Handler {
 			attrs = attrs[:0]
 
 			if m.addRequestHeaders {
-				attrs = append(attrs, attribute.String(
-					AttributeKeyHeaders, bufReq.headers.String()))
+				m.addReqRespItem(&attrs, AttributeKeyHeaders, bufReq.body)
 			}
 			if m.addRequestBody {
-				attrs = append(attrs, attribute.String(
-					AttributeKeyBody, bufReq.body.String()))
+				m.addReqRespItem(&attrs, AttributeKeyBody, bufReq.body)
 			}
 			span.AddEvent("Request details", trace.WithAttributes(attrs...))
 		}
@@ -137,12 +137,10 @@ func (m *middleware) Callback(next ekaweb.Handler) ekaweb.Handler {
 			attrs = attrs[:0]
 
 			if m.addResponseHeaders {
-				attrs = append(attrs, attribute.String(
-					AttributeKeyHeaders, bufResp.headers.String()))
+				m.addReqRespItem(&attrs, AttributeKeyHeaders, bufResp.headers)
 			}
 			if m.addResponseBody {
-				attrs = append(attrs, attribute.String(
-					AttributeKeyBody, bufResp.body.String()))
+				m.addReqRespItem(&attrs, AttributeKeyBody, bufResp.body)
 			}
 			span.AddEvent("Response details", trace.WithAttributes(attrs...))
 		}
@@ -180,13 +178,18 @@ func (m *middleware) CheckErrorBefore() bool { return false }
 ///// PRIVATE METHODS //////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-func (_ *middleware) addReqRespItem(
-	to *[]attribute.KeyValue, key string, buf *bytes.Buffer, check bool) {
+func (m *middleware) addReqRespItem(
+	to *[]attribute.KeyValue, key string, buf *bytes.Buffer) {
 
 	// buf.String() here makes a copy of underlying that.
 	// Thus, it's safe to reuse this buffer later.
 
-	if check {
-		*to = append(*to, attribute.String(key, buf.String()))
+	var s = buf.String()
+
+	if m.cbAttributeInvalid != nil && !utf8.ValidString(s) {
+		m.cbAttributeInvalid(s)
+		return
 	}
+
+	*to = append(*to, attribute.String(key, buf.String()))
 }
